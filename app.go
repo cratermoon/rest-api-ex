@@ -63,6 +63,16 @@ func filterAndSort(queryValues map[string][]string) string {
 	postal := valueFromQueryParam(queryValues["postal"])
 	category := valueFromQueryParam(queryValues["category"])
 	result := data.Search(name, city, state, postal, category)
+	orderBy := valueFromQueryParam(queryValues["orderby"])
+	direction := valueFromQueryParam(queryValues["direction"])
+	if orderBy != "" {
+		log.Printf("ordering result by %s in %s order\n", orderBy, direction)
+		if direction == "dsc" {
+			result = ReverseOrderBy(orderBy, result)
+		} else {
+			result = OrderBy(orderBy,result)
+		}
+	}
 	var b bytes.Buffer
 	enc := json.NewEncoder(&b)
 	wrapper := map[string][]Organization{

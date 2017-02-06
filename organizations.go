@@ -2,6 +2,7 @@ package main
 
 import (
   "log"
+  "sort"
   "strconv"
 )
 // id,name,city,state,postal,category
@@ -52,6 +53,43 @@ func populate(records [][]string) *Organizations {
 
 func match(criteria string, value string) bool {
   return criteria == "" || criteria == value
+}
+
+
+func OrderBy(key string, orgs []Organization) []Organization {
+  switch key {
+  case "id":
+    sort.Sort(ById(orgs))
+  case "name":
+    sort.Sort(ByName(orgs))
+  case "city":
+    sort.Sort(ByCity(orgs))
+  case "state":
+    sort.Sort(ByState(orgs))
+  case "postal":
+    sort.Sort(ByPostal(orgs))
+  case "category":
+    sort.Sort(ByCategory(orgs))
+  }
+  return orgs
+}
+
+func ReverseOrderBy(key string, orgs []Organization) []Organization {
+  switch key {
+  case "id":
+    sort.Sort(sort.Reverse(ById(orgs)))
+  case "name":
+    sort.Sort(sort.Reverse(ByName(orgs)))
+  case "city":
+    sort.Sort(sort.Reverse(ByCity(orgs)))
+  case "state":
+    sort.Sort(sort.Reverse(ByState(orgs)))
+  case "postal":
+    sort.Sort(sort.Reverse(ByPostal(orgs)))
+  case "category":
+    sort.Sort(sort.Reverse(ByCategory(orgs)))
+  }
+  return orgs
 }
 
 func (ol Organizations) Search(name string, city string, state string, postal string, category string) []Organization {
