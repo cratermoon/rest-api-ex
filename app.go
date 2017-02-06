@@ -32,30 +32,44 @@ func valueFromQueryParam(values []string) string {
 	return ""
 }
 
+func findById(id []string) (org Organization) {
+	val, err := strconv.Atoi(id[0])
+	if (err == nil) {
+		org = data.Get(val)
+	}
+	return org
+}
+
+func encodeOrganization(org Organization) string {
+	var b bytes.Buffer
+	enc := json.NewEncoder(&b)
+	enc.Encode(org)
+	jsonString := b.String();
+	return jsonString
+}
+
 func filterAndSort(queryValues map[string][]string) string {
-	var result Organization
 	id := queryValues["id"]
-	log.Println("id param is ", id)
 	if (id != nil) {
-		val, err := strconv.Atoi(id[0])
-		if (err == nil) {
-			result = data.Get(val)
-		}
+		log.Println("Found an id query parmeter ", id)
+		org := findById(id)
+		return encodeOrganization(org)
 	}
 	// we're only going to take the first qs value.
-
+	// this is wrong in the general case
 	name := valueFromQueryParam(queryValues["name"])
 	city := valueFromQueryParam(queryValues["city"])
 	state := valueFromQueryParam(queryValues["state"])
 	postal := valueFromQueryParam(queryValues["postal"])
 	category := valueFromQueryParam(queryValues["category"])
-	data.Search(name, city, state, postal, category)
+	result := data.Search(name, city, state, postal, category)
 	var b bytes.Buffer
 	enc := json.NewEncoder(&b)
-  enc.Encode(result)
-	log.Println("result in filterAndSort is ", result)
+	wrapper := map[string][]Organization{
+		"organizations": result,
+	}
+  enc.Encode(wrapper)
 	jsonString := b.String();
-	log.Println("jsonString in filterAndSort is ", jsonString)
 	return jsonString
 }
 

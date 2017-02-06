@@ -15,19 +15,19 @@ type Organization struct {
 }
 
 type Organizations struct {
-  organizations map[int][]string
+  Organizations map[int][]string `json:"organizations"`
 }
 
 func (ol *Organizations) add(id int, org []string) {
   log.Printf("Adding %d %v", id, org)
-  ol.organizations[id] = org
+  ol.Organizations[id] = org
 }
 
 func (ol *Organizations) count() int {
-  return len(ol.organizations)
+  return len(ol.Organizations)
 }
 func (ol Organizations) Get(id int) Organization {
-  if values,ok := ol.organizations[id]; ok {
+  if values,ok := ol.Organizations[id]; ok {
     return Organization{id, values[0], values[1], values[2], values[3], values[4]}
   }
   return Organization{0, "NOT FOUND", "","","", ""}
@@ -35,7 +35,7 @@ func (ol Organizations) Get(id int) Organization {
 
 func populate(records [][]string) *Organizations {
   organizations := new(Organizations)
-  organizations.organizations = make(map[int][]string)
+  organizations.Organizations = make(map[int][]string)
   for idx := range records {
 		r := records[idx]
 		id,err := strconv.Atoi(r[0])
@@ -56,7 +56,7 @@ func match(criteria string, value string) bool {
 
 func (ol Organizations) Search(name string, city string, state string, postal string, category string) []Organization {
   matches := []Organization{}
-  for id, org := range ol.organizations {
+  for id, org := range ol.Organizations {
     if match(name, org[0]) && match(city, org[1]) && match(state, org[2])&& match(postal, org[3])&& match(category, org[4]){
       matches = append(matches, Organization{id, org[0], org[1], org[2], org[3], org[4]})
     }
