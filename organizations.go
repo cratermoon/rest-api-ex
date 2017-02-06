@@ -1,88 +1,65 @@
 package main
 
 import (
-  "errors"
   "log"
   "strconv"
 )
 // id,name,city,state,postal,category
 type Organization struct {
-  id int
-  name string
-  city string
-  state string
-  postal string
-  category string
+  Id int `json:"id"`
+  Name string `json:"name"`
+  City string `json:"city"`
+  State string `json:"state"`
+  Postal string `json:"postal"`
+  Category string `json:"category"`
 }
 
-type OrganizationList struct {
-  organizations []Organization
+type Organizations struct {
+  organizations map[int][]string
 }
 
-func (ol *OrganizationList) add(o Organization) {
-  ol.organizations = append(ol.organizations, o)
+func (ol *Organizations) add(id int, org []string) {
+  log.Printf("Adding %d %v", id, org)
+  ol.organizations[id] = org
 }
 
-func (ol *OrganizationList) count() int {
+func (ol *Organizations) count() int {
   return len(ol.organizations)
 }
-func (ol OrganizationList) Get(id int) (Organization, error) {
-  for idx := range ol.organizations {
-      if ol.organizations[idx].id == id {
-        return ol.organizations[idx], nil
-      }
+func (ol Organizations) Get(id int) Organization {
+  if values,ok := ol.organizations[id]; ok {
+    return Organization{id, values[0], values[1], values[2], values[3], values[4]}
   }
-  return Organization{}, errors.New("No such organization")
+  return Organization{0, "NOT FOUND", "","","", ""}
 }
 
-func populate(records [][]string) *OrganizationList {
-  organizations := new(OrganizationList)
+func populate(records [][]string) *Organizations {
+  organizations := new(Organizations)
+  organizations.organizations = make(map[int][]string)
   for idx := range records {
 		r := records[idx]
 		id,err := strconv.Atoi(r[0])
     if err != nil {
 			log.Fatal(err)
 		}
-    name := r[1]
-    city := r[2]
-    state := r[3]
-    postal := r[4]
-    category := r[5]
+    org := []string{r[1], r[2], r[3], r[4], r[5]}
 
-		newOrganization := Organization{id,name,city,state,postal,category}
-		organizations.add(newOrganization)
+		organizations.add(id, org)
 	}
   log.Printf("Population complete, %d organizations found\n", organizations.count())
 	return organizations
 }
 
-func matchName(val string, org Organization) bool {
-  return val == org.name
+func match(criteria string, value string) bool {
+  return criteria == "" || criteria == value
 }
 
-func matchCity(val string, org Organization) bool {
-  return val == org.city
-}
-
-func matchState(val string, org Organization) bool {
-  return val == org.state
-}
-
-func matchPostal(val string, org Organization) bool {
-  return val == org.postal
-}
-
-func matchCategory(val string, org Organization) bool {
-  return val == org.category
-}
-
-func (ol OrganizationList) Search(val string, fn func(string,Organization)(bool)) []Organization {
+func (ol Organizations) Search(name string, city string, state string, postal string, category string) []Organization {
   matches := []Organization{}
-  for idx := range ol.organizations {
-    org := ol.organizations[idx]
-      if fn(val,org) {
-        matches = append(matches, org)
-      }
+  for id, org := range ol.organizations {
+    if match(name, org[0]) && match(city, org[1]) && match(state, org[2])&& match(postal, org[3])&& match(category, org[4]){
+      matches = append(matches, Organization{id, org[0], org[1], org[2], org[3], org[4]})
+    }
   }
   return matches
 }
